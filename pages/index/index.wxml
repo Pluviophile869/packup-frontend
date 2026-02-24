@@ -1,0 +1,53 @@
+<view class="container">
+  <view class="title">Packup · 智能打包助手</view>
+
+  <!-- 旅行地点 -->
+  <view class="form-item">
+    <text class="label">旅行目的地</text>
+    <input placeholder="请输入城市/景区名称" bindinput="setPlace" class="input" />
+  </view>
+
+  <!-- 旅行天数 -->
+  <view class="form-item">
+    <text class="label">旅行天数</text>
+    <input placeholder="例如：3天" bindinput="setDays" class="input" type="number" />
+  </view>
+
+  <!-- 天气情况 -->
+  <view class="form-item">
+    <text class="label">当地天气</text>
+    <picker bindchange="setWeather" value="{{weatherIndex}}" range="{{weatherList}}">
+      <view class="picker">{{weatherList[weatherIndex]}}</view>
+    </picker>
+  </view>
+
+  <!-- 旅行类型 -->
+  <view class="form-item">
+    <text class="label">旅行类型</text>
+    <picker bindchange="setType" value="{{typeIndex}}" range="{{typeList}}">
+      <view class="picker">{{typeList[typeIndex]}}</view>
+    </picker>
+  </view>
+
+  <!-- 行程活动（多选） -->
+  <view class="form-item">
+    <text class="label">行程活动（可多选）</text>
+    <view class="checkbox-group">
+      <label class="activity-item" wx:for="{{activities}}" wx:key="index">
+        <checkbox value="{{item}}" checked="{{selectedActivities.includes(item)}}" bindchange="onActivityChange" />
+        <text>{{item}}</text>
+      </label>
+    </view>
+  </view>
+
+  <!-- 个人体质 -->
+  <view class="form-item">
+    <text class="label">个人体质/特殊情况</text>
+    <picker bindchange="setPhysique" value="{{physiqueIndex}}" range="{{physiqueList}}">
+      <view class="picker">{{physiqueList[physiqueIndex]}}</view>
+    </picker>
+  </view>
+
+  <!-- 提交按钮 -->
+  <button class="submit-btn" bindtap="getList">生成行李清单</button>
+</view>

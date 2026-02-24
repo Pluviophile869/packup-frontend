@@ -1,0 +1,7 @@
+# 微信小程序忽略文件
+.project
+miniprogram_npm/
+node_modules/
+.DS_Store
+Thumbs.db
+*.log

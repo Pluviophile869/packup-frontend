@@ -1,0 +1,89 @@
+.container {
+  padding: 30rpx;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+}
+
+/* 信息卡片 */
+.info-card {
+  background-color: var(--card-bg);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+.info-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 20rpx;
+}
+.info-item {
+  font-size: 28rpx;
+  color: var(--text-light);
+  margin-bottom: 12rpx;
+}
+
+/* 分类清单 */
+.list-container {
+  margin-bottom: 40rpx;
+}
+.category {
+  margin-bottom: 30rpx;
+}
+.category-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 16rpx;
+  padding-left: 8rpx;
+  border-left: 4rpx solid var(--secondary-color);
+}
+.list-item {
+  background-color: var(--card-bg);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03);
+}
+.goods-name {
+  font-size: 28rpx;
+  color: var(--text-main);
+  margin-left: 16rpx;
+}
+
+/* 按钮组 */
+.btn-group {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+.save-btn {
+  flex: 1;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50rpx;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  border: none;
+}
+.share-btn {
+  flex: 1;
+  background-color: var(--secondary-color);
+  color: white;
+  border-radius: 50rpx;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  border: none;
+}
+.back-btn {
+  flex: 1;
+  background-color: var(--card-bg);
+  color: var(--primary-color);
+  border: 2rpx solid var(--primary-color);
+  border-radius: 50rpx;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+}

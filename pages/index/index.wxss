@@ -1,0 +1,79 @@
+/* 全局容器 */
+.container {
+  padding: 30rpx;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+}
+
+/* 标题 */
+.title {
+  font-size: 44rpx;
+  font-weight: bold;
+  text-align: center;
+  margin: 40rpx 0;
+  color: var(--primary-color);
+}
+
+/* 表单项 */
+.form-item {
+  background-color: var(--card-bg);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.08);
+}
+
+/* 表单标签 */
+.label {
+  font-size: 30rpx;
+  color: var(--text-main);
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+/* 输入框 */
+.input {
+  font-size: 30rpx;
+  color: var(--text-light);
+  padding: 8rpx 0;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+/* 选择器 */
+.picker {
+  font-size: 30rpx;
+  color: var(--text-light);
+  padding: 8rpx 0;
+}
+
+/* 行程活动多选样式 */
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+.activity-item {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-color);
+  padding: 12rpx 20rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid var(--border-color);
+}
+.activity-item text {
+  margin-left: 8rpx;
+  font-size: 26rpx;
+  color: var(--text-light);
+}
+
+/* 提交按钮 */
+.submit-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50rpx;
+  font-size: 34rpx;
+  padding: 24rpx 0;
+  margin-top: 40rpx;
+  border: none;
+}

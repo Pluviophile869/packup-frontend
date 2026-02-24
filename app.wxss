@@ -1,0 +1,24 @@
+/* 全局颜色变量（提夫尼蓝+薄荷绿） */
+page {
+  --primary-color: #0ABAB5;    /* 提夫尼蓝（主色） */
+  --secondary-color: #8EE4AF;  /* 薄荷绿（辅助色） */
+  --bg-color: #F7FFFC;         /* 页面背景（极浅绿） */
+  --card-bg: #FFFFFF;          /* 卡片背景（白色） */
+  --text-main: #2D3436;        /* 主要文字（深灰） */
+  --text-light: #636E72;       /* 次要文字（浅灰） */
+  --border-color: #E8F8F5;     /* 边框色（浅绿） */
+}
+
+/* 全局重置（小程序兼容写法） */
+view, text, button, input, picker, checkbox, label {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 全局页面背景 */
+page {
+  background-color: var(--bg-color);
+  font-size: 28rpx;
+  color: var(--text-main);
+}

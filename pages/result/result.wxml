@@ -1,0 +1,30 @@
+<view class="container">
+  <!-- 旅行信息卡片 -->
+  <view class="info-card">
+    <view class="info-title">✅ 你的旅行信息</view>
+    <view class="info-item">📍 目的地：{{place}}</view>
+    <view class="info-item">📅 时长：{{days}} 天</view>
+    <view class="info-item">🌤️ 天气：{{weatherList[weatherIndex]}}</view>
+    <view class="info-item">🎯 类型：{{typeList[typeIndex]}}</view>
+    <view class="info-item">🏃 行程：{{selectedActivities.join('、') || '未选择'}}</view>
+    <view class="info-item">🧑 体质：{{physiqueList[physiqueIndex]}}</view>
+  </view>
+
+  <!-- 分类行李清单 -->
+  <view class="list-container">
+    <view class="category" wx:for="{{listCategories}}" wx:key="title">
+      <view class="category-title">{{item.title}}</view>
+      <view class="list-item" wx:for="{{item.items}}" wx:for-item="goods" wx:key="name">
+        <checkbox checked="{{goods.checked}}" color="{{secondaryColor}}" />
+        <text class="goods-name">{{goods.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮（保存模板+分享+返回） -->
+  <view class="btn-group">
+    <button class="save-btn" bindtap="saveAsTemplate">保存为模板</button>
+    <button class="share-btn" open-type="share">分享清单</button>
+    <button class="back-btn" bindtap="goBack">重新生成</button>
+  </view>
+</view>
