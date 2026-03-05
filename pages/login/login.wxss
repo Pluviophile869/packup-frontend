@@ -1,0 +1,233 @@
+/* pages/login/login.wxss */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #48c4bf 0%, #7aece7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+.login-card {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 40rpx;
+  padding: 60rpx 40rpx;
+  box-shadow: 0 20rpx 40rpx rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+/* 顶部图标区域 */
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60rpx;
+}
+
+.logo {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 20rpx;
+  border-radius: 30rpx;
+}
+
+.app-name {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #0ABAB5;
+  margin-bottom: 8rpx;
+}
+
+.app-slogan {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 表单区域 */
+.form-container {
+  width: 100%;
+}
+
+.form-item {
+  position: relative;
+  margin-bottom: 40rpx;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  height: 90rpx;
+  border: 2rpx solid #f0f0f0;
+  border-radius: 16rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+}
+
+.input:focus {
+  border-color: #48c4bf;
+  background-color: #ffffff;
+}
+
+/* 密码切换按钮 */
+.password-toggle {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-icon {
+  font-size: 32rpx;
+  color: #999;
+}
+
+/* 登录切换 */
+.login-switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  font-size: 26rpx;
+}
+
+.switch-text {
+  color: #48c4bf;
+}
+
+.forgot-password {
+  color: #999;
+}
+
+/* 登录按钮 */
+.login-btn {
+  width: 100%;
+  height: 90rpx;
+  background-color: #48c4bf;
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 45rpx;
+  margin-bottom: 20rpx;
+  line-height: 90rpx;
+}
+
+.login-btn[disabled] {
+  background-color: #b3e5e2;
+  color: #ffffff;
+}
+
+/* 新增：注册按钮 */
+.register-btn {
+  width: 100%;
+  height: 90rpx;
+  background-color: #ffffff;
+  color: #48c4bf;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 45rpx;
+  margin-bottom: 40rpx;
+  line-height: 90rpx;
+  border: 2rpx solid #48c4bf;
+  box-sizing: border-box;
+}
+
+.register-btn[disabled] {
+  background-color: #f5f5f5;
+  color: #b3e5e2;
+  border-color: #b3e5e2;
+}
+
+/* 其他登录方式（保留以备后续使用） */
+.other-login {
+  margin-bottom: 40rpx;
+}
+
+.other-text {
+  display: block;
+  text-align: center;
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 30rpx;
+  position: relative;
+}
+
+.other-text::before,
+.other-text::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 100rpx;
+  height: 2rpx;
+  background-color: #f0f0f0;
+}
+
+.other-text::before {
+  left: 0;
+}
+
+.other-text::after {
+  right: 0;
+}
+
+.other-icons {
+  display: flex;
+  justify-content: center;
+  gap: 60rpx;
+}
+
+.other-icon {
+  width: 80rpx;
+  height: 80rpx;
+  background-color: #f5f5f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.other-icon .icon {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 用户协议 */
+.agreement {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 24rpx;
+}
+
+.agreement-text {
+  color: #999;
+}
+
+.agreement-link {
+  color: #48c4bf;
+  margin: 0 4rpx;
+}
+
+/* 错误提示样式（可选） */
+.error-message {
+  color: #ff6b6b;
+  font-size: 24rpx;
+  margin-top: 8rpx;
+  padding-left: 20rpx;
+}

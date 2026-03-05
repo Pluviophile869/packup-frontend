@@ -1,3 +1,28 @@
+/* 固定标题栏 */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 110rpx;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.header-right {
+  position: absolute;
+  right: 30rpx;
+  top: 45rpx;
+  display: flex;
+  align-items: center;
+}
+
 /* 容器 */
 .container {
   padding: 30rpx;

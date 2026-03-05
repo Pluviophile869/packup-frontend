@@ -1,0 +1,65 @@
+<!-- pages/login/login.wxml -->
+<view class="container">
+  <view class="login-card">
+    <!-- 顶部图标 -->
+    <view class="logo-container">
+      <text class="app-name">Packup</text>
+      <text class="app-slogan">智能行李清单</text>
+    </view>
+
+    <!-- 登录表单 -->
+    <view class="form-container">
+      <view class="form-item">
+        <text class="label">用户名</text>
+        <input 
+          class="input" 
+          placeholder="请输入用户名/手机号" 
+          bindinput="onUsernameInput" 
+          value="{{username}}"
+          type="text"
+          maxlength="20"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label">密码</text>
+        <input 
+          class="input" 
+          placeholder="请输入密码（6-30位）" 
+          bindinput="onPasswordInput" 
+          value="{{password}}"
+          password="{{!showPassword}}"
+          type="text"
+          maxlength="30"
+        />
+        <view class="password-toggle" bindtap="togglePassword">
+          <text class="toggle-icon">{{showPassword ? '👁️' : '👁️‍🗨️'}}</text>
+        </view>
+      </view>
+
+      <!-- 验证码登录切换（可选） -->
+      <view class="login-switch">
+        <text class="switch-text" bindtap="switchToCode">验证码登录</text>
+        <text class="forgot-password" bindtap="forgotPassword">忘记密码？</text>
+      </view>
+
+      <!-- 登录按钮 -->
+      <button class="login-btn" bindtap="handleLogin" loading="{{loginLoading}}" disabled="{{!canLoginFlag}}">
+        {{loginLoading ? '登录中...' : '登录'}}
+      </button>
+
+      <!-- 注册按钮（新增） -->
+      <button class="register-btn" bindtap="handleRegister" loading="{{loginLoading}}" disabled="{{!canLoginFlag}}">
+        注册新账号
+      </button>
+
+      <!-- 用户协议 -->
+      <view class="agreement">
+        <text class="agreement-text">登录即代表同意</text>
+        <text class="agreement-link" bindtap="viewUserAgreement">《用户协议》</text>
+        <text class="agreement-text">和</text>
+        <text class="agreement-link" bindtap="viewPrivacyPolicy">《隐私政策》</text>
+      </view>
+    </view>
+  </view>
+</view>

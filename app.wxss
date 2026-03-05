@@ -16,6 +16,7 @@ view, text, button, input, picker, checkbox, label {
   box-sizing: border-box;
 }
 
+
 /* 全局页面背景 */
 page {
   background-color: var(--bg-color);

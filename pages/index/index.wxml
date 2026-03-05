@@ -1,22 +1,65 @@
-<view class="container">
-  <view class="title">Packup · 智能打包助手</view>
+<!-- 固定标题栏 -->
+<view class="fixed-header">
+  <view class="header-left">
+    <!-- 圆形头像按钮，点击展开侧栏 -->
+    <view class="avatar" bindtap="openSidebar">
+      <image src="/images/avatar.png" mode="aspectFill"></image>
+    </view>
+    <text class="title">Packup · 智能打包助手</text>
+  </view>
+  <view class="header-right"></view>
+</view>
 
+<!-- 页面内容 -->
+<view class="page-content">
   <!-- 旅行地点 -->
   <view class="form-item">
     <text class="label">旅行目的地</text>
-    <input placeholder="请输入城市/景区名称" bindinput="setPlace" class="input" />
+    <input 
+      placeholder="请输入城市/景区名称" 
+      bindinput="setPlace" 
+      class="input" 
+      value="{{place}}"
+    />
+  </view>
+
+  <!-- 出发日期 -->
+  <view class="form-item {{errors.date ? 'error' : ''}}">
+    <text class="label">出发日期</text>
+    <picker 
+      mode="date" 
+      bindchange="setDate" 
+      value="{{date}}"
+      start="{{startDate}}" 
+      end="{{endDate}}"
+    >
+      <view class="picker">
+        {{date || '请选择出发日期'}}
+      </view>
+    </picker>
   </view>
 
   <!-- 旅行天数 -->
   <view class="form-item">
     <text class="label">旅行天数</text>
-    <input placeholder="例如：3天" bindinput="setDays" class="input" type="number" />
+    <input 
+      placeholder="例如：3天" 
+      bindinput="setDays" 
+      class="input" 
+      type="number" 
+      value="{{days}}"
+    />
   </view>
 
   <!-- 天气情况 -->
   <view class="form-item">
     <text class="label">当地天气</text>
-    <picker bindchange="setWeather" value="{{weatherIndex}}" range="{{weatherList}}">
+    <picker 
+      bindchange="setWeather" 
+      value="{{weatherIndex}}" 
+      range="{{weatherList}}"
+      mode="selector"
+    >
       <view class="picker">{{weatherList[weatherIndex]}}</view>
     </picker>
   </view>
@@ -24,30 +67,67 @@
   <!-- 旅行类型 -->
   <view class="form-item">
     <text class="label">旅行类型</text>
-    <picker bindchange="setType" value="{{typeIndex}}" range="{{typeList}}">
+    <picker 
+      bindchange="setType" 
+      value="{{typeIndex}}" 
+      range="{{typeList}}"
+      mode="selector"
+    >
       <view class="picker">{{typeList[typeIndex]}}</view>
     </picker>
   </view>
 
   <!-- 行程活动（多选） -->
   <view class="form-item">
-    <text class="label">行程活动（可多选）</text>
-    <view class="checkbox-group">
-      <label class="activity-item" wx:for="{{activities}}" wx:key="index">
-        <checkbox value="{{item}}" checked="{{selectedActivities.includes(item)}}" bindchange="onActivityChange" />
-        <text>{{item}}</text>
-      </label>
-    </view>
+    <text class="label">行程活动</text>
+    <input 
+      placeholder="例如海边玩水、博物馆参观、城市观光等" 
+      bindinput="setActivities" 
+      class="input" 
+      value="{{activities}}"
+    />
   </view>
 
   <!-- 个人体质 -->
   <view class="form-item">
     <text class="label">个人体质/特殊情况</text>
-    <picker bindchange="setPhysique" value="{{physiqueIndex}}" range="{{physiqueList}}">
+    <picker 
+      bindchange="setPhysique" 
+      value="{{physiqueIndex}}" 
+      range="{{physiqueList}}"
+      mode="selector"
+    >
       <view class="picker">{{physiqueList[physiqueIndex]}}</view>
     </picker>
   </view>
 
   <!-- 提交按钮 -->
   <button class="submit-btn" bindtap="getList">生成行李清单</button>
+</view>
+
+<!-- 侧栏遮罩层 -->
+<view class="sidebar-mask" wx:if="{{showSidebar}}" bindtap="closeSidebar"></view>
+
+<!-- 侧栏内容 -->
+<view class="sidebar" wx:if="{{showSidebar}}">
+  <view class="sidebar-header">
+    <image src="/images/avatar.png" mode="aspectFill" class="sidebar-avatar"></image>
+    <view class="sidebar-user-info">
+      <text class="user-name">旅行者</text>
+    </view>
+  </view>
+  
+  <view class="sidebar-menu">
+    <view class="menu-item" bindtap="goToPage" data-page="favorites">
+      <text class="menu-icon">📋</text>
+      <text class="menu-text">我的模板</text>
+    </view>
+  </view>
+  
+  <view class="sidebar-footer">
+    <view class="menu-item" bindtap="logout">
+      <text class="menu-icon">🚪</text>
+      <text class="menu-text">退出登录</text>
+    </view>
+  </view>
 </view>

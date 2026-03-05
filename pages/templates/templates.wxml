@@ -1,0 +1,246 @@
+<!-- pages/templates/templates.wxml -->
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <text class="title">我的行程</text>
+    <view class="add-btn" bindtap="addTrip">
+      <text class="add-icon">+</text>
+    </view>
+  </view>
+
+  <!-- 标签栏 - 加号固定在右侧 -->
+  <view class="tabs-container">
+    <!-- 可滑动的标签区域 -->
+    <scroll-view class="tabs-scroll" scroll-x enhanced show-scrollbar="{{false}}" scroll-left="{{scrollLeft}}">
+      <view class="tabs-wrapper">
+        <!-- 默认标签 -->
+        <view class="tab-item {{currentTab === index ? 'active' : ''}}" 
+              wx:for="{{defaultTabs}}" 
+              wx:key="index" 
+              data-index="{{index}}"
+              bindtap="switchTab">
+          <text>{{item}}</text>
+        </view>
+        
+        <!-- 自定义标签 - 带删除按钮 -->
+        <view class="tab-item {{currentTab === defaultTabs.length + customIndex ? 'active' : ''}} custom-tab" 
+              wx:for="{{customTabs}}" 
+              wx:key="customIndex" 
+              wx:for-index="customIndex">
+          <!-- 标签内容 - 点击切换 -->
+          <view class="tab-content" 
+                data-index="{{defaultTabs.length + customIndex}}"
+                bindtap="switchTab">
+            <text>{{item}}</text>
+          </view>
+          <!-- 删除按钮 - 点击删除 -->
+          <view class="tab-close" 
+                catchtap="confirmDeleteTab" 
+                data-index="{{customIndex}}">
+            <text class="close-icon">✕</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    
+    <!-- 固定加号按钮 - 放在右侧 -->
+    <view class="fixed-add-tab" bindtap="showAddTabModal">
+      <text class="add-icon">+</text>
+    </view>
+  </view>
+
+  <!-- 页面内容 -->
+  <view class="page-content">
+    <!-- 行程列表 -->
+    <view class="trips-list">
+      <!-- 使用 index 作为 key -->
+      <view class="trip-card" wx:for="{{filteredTrips}}" wx:key="index" data-id="{{item.id}}">
+        <view class="trip-header">
+          <view class="trip-info">
+            <text class="trip-name">{{item.tripName || '未命名行程'}}</text>
+          </view>
+          <view class="trip-actions">
+            <!-- 编辑按钮 - 使用catchtap防止冒泡 -->
+            <view class="action-btn edit-btn" 
+                  catchtap="editTrip" 
+                  data-id="{{item.id}}">
+              <text class="action-icon">✏️</text>
+            </view>
+            <!-- 删除按钮 - 使用catchtap防止冒泡 -->
+            <view class="action-btn delete-btn" 
+                  catchtap="confirmDeleteTrip" 
+                  data-id="{{item.id}}">
+              <text class="action-icon">🗑️</text>
+            </view>
+          </view>
+        </view>
+        
+        <view class="trip-meta">
+          <text class="meta-item">📅 {{item.days || '0'}}天</text>
+          <text class="meta-item">📍 {{item.cityName || '未指定目的地'}}</text>
+          <text class="meta-item">👤 {{item.type || '通用'}}</text>
+        </view>
+        
+        <view class="trip-dates" wx:if="{{item.startDate}}">
+          <text class="date-item">📆 {{item.startDate}} 至 {{item.endDate || item.startDate}}</text>
+        </view>
+        
+        <!-- 底部：显示行程的标签 -->
+        <view class="trip-footer">
+          <view class="footer-tags">
+            <!-- 显示行程的天气和体质信息 -->
+            <text class="footer-tag-text" wx:if="{{item.weather}}">{{item.weather}}</text>
+            <text class="footer-tag-text" wx:if="{{item.physique}}">{{item.physique}}</text>
+            <text class="footer-tag-text" wx:if="{{!item.weather && !item.physique}}">{{item.type || '通用'}}</text>
+          </view>
+          <!-- 使用查看模板 - 使用catchtap防止冒泡 -->
+          <view class="use-btn" 
+                catchtap="useTrip" 
+                data-id="{{item.id}}">
+            <text>查看模板</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{filteredTrips.length === 0}}">
+        <image class="empty-image" mode="aspectFit"></image>
+        <text class="empty-text">暂无行程，快去创建一个吧！</text>
+        <!-- 创建行程按钮 -->
+        <button class="create-btn" bindtap="addTrip">+ 创建行程</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 创建/编辑行程弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+  <view class="modal-content" wx:if="{{showModal}}">
+    <view class="modal-header">
+      <text class="modal-title">{{modalTitle}}</text>
+      <view class="modal-close" bindtap="closeModal">✕</view>
+    </view>
+    
+    <scroll-view class="modal-body" scroll-y>
+      <view class="form-item">
+        <text class="label">行程名称 <text class="required">*</text></text>
+        <input class="input" placeholder="例如：三亚之旅" bindinput="onTripNameInput" value="{{formData.tripName}}" />
+      </view>
+      
+      <view class="form-item">
+        <text class="label">目的地 <text class="required">*</text></text>
+        <input class="input" placeholder="例如：三亚" bindinput="onDestinationInput" value="{{formData.destination}}" />
+      </view>
+      
+      <view class="form-row">
+        <view class="form-item half">
+          <text class="label">开始日期 <text class="required">*</text></text>
+          <picker mode="date" bindchange="onStartDateInput" value="{{formData.startDate}}">
+            <view class="picker">{{formData.startDate || '选择日期'}}</view>
+          </picker>
+        </view>
+        
+        <view class="form-item half">
+          <text class="label">天数 <text class="required">*</text></text>
+          <input class="input" placeholder="天数" type="number" bindinput="onDaysInput" value="{{formData.days}}" />
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <text class="label">旅行类型</text>
+        <picker bindchange="onTypeChange" value="{{formData.typeIndex}}" range="{{typeList}}">
+          <view class="picker">{{typeList[formData.typeIndex] || '选择类型'}}</view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <text class="label">活动描述</text>
+        <input class="input" placeholder="例如：海边度假、登山徒步" bindinput="onActivitiesInput" value="{{formData.activities}}" />
+      </view>
+      
+      <view class="form-row">
+        <view class="form-item half">
+          <text class="label">天气</text>
+          <picker bindchange="onWeatherChange" value="{{formData.weather}}" range="{{weatherList}}">
+            <view class="picker">{{weatherList[formData.weather] || '选择天气'}}</view>
+          </picker>
+        </view>
+        
+        <view class="form-item half">
+          <text class="label">体质</text>
+          <picker bindchange="onPhysiqueChange" value="{{formData.physique}}" range="{{physiqueList}}">
+            <view class="picker">{{physiqueList[formData.physique] || '选择体质'}}</view>
+          </picker>
+        </view>
+      </view>
+      
+      <!-- 标签选择器 - 点击选中/取消，选中时变深色 -->
+      <view class="form-item">
+        <text class="label">选择标签</text>
+        <view class="tags-selector-container">
+          <!-- 显示已选标签 -->
+          <view class="selected-tags" wx:if="{{formData.tags && formData.tags.length > 0}}">
+            <view class="selected-tag" wx:for="{{formData.tags}}" wx:key="index" wx:if="{{item}}">
+              <text class="selected-tag-text">{{item}}</text>
+              <text class="selected-tag-remove" catchtap="removeTag" data-tag="{{item}}">✕</text>
+            </view>
+          </view>
+          
+          <!-- 可选择的标签列表 -->
+          <view class="tags-list">
+            <!-- 默认标签 - 点击切换选中状态 -->
+            <view class="tab-item {{formData.tags && formData.tags.includes(item) ? 'active' : ''}}" 
+                  wx:for="{{defaultTabs}}" 
+                  wx:key="index"
+                  catchtap="toggleTag"
+                  data-tag="{{item}}">
+              <text>{{item}}</text>
+            </view>
+            
+            <!-- 自定义标签 - 点击切换选中状态 -->
+            <view class="tab-item {{formData.tags && formData.tags.includes(item) ? 'active' : ''}}" 
+                  wx:for="{{customTabs}}" 
+                  wx:key="index"
+                  catchtap="toggleTag"
+                  data-tag="{{item}}">
+              <text>{{item}}</text>
+            </view>
+            
+            <!-- 添加新标签按钮 -->
+            <view class="add-tag-btn-small" bindtap="showAddTabModal">
+              <text class="add-icon-small">+</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+    </scroll-view>
+    
+    <view class="modal-footer">
+      <button class="cancel-btn" bindtap="closeModal">取消</button>
+      <button class="confirm-btn" bindtap="saveTrip">保存行程</button>
+    </view>
+  </view>
+
+  <!-- 添加自定义标签弹窗 -->
+  <view class="modal-mask" wx:if="{{showAddTabModal}}" bindtap="closeAddTabModal"></view>
+  <view class="modal-content small" wx:if="{{showAddTabModal}}">
+    <view class="modal-header">
+      <text class="modal-title">新建标签</text>
+      <view class="modal-close" bindtap="closeAddTabModal">✕</view>
+    </view>
+    
+    <view class="modal-body">
+      <view class="form-item">
+        <input class="input" placeholder="请输入标签名称" bindinput="onNewTabNameInput" value="{{newTabName}}" />
+      </view>
+    </view>
+    
+    <view class="modal-footer">
+      <button class="cancel-btn" bindtap="closeAddTabModal">取消</button>
+      <button class="confirm-btn" bindtap="addCustomTab">添加</button>
+    </view>
+  </view>
+</view>

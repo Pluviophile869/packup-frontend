@@ -1,17 +1,79 @@
-/* 全局容器 */
-.container {
-  padding: 30rpx;
+/* pages/index/index.wxss */
+
+/* 全局变量 */
+page {
+  --primary-color: #0ABAB5;
+  --secondary-color: #8EE4AF;
+  --bg-color: #F7FFFC;
+  --card-bg: #ffffff;
+  --text-main: #333333;
+  --text-light: #666666;
+  --border-color: #eeeeee;
   background-color: var(--bg-color);
-  min-height: 100vh;
 }
 
-/* 标题 */
+/* 固定标题栏 */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 110rpx;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 66rpx;
+  height: 66rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.avatar image {
+  width: 100%;
+  height: 100%;
+}
+
 .title {
   font-size: 44rpx;
   font-weight: bold;
-  text-align: center;
-  margin: 40rpx 0;
-  color: var(--primary-color);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: #0ABAB5;
+}
+
+.header-right {
+  width: 66rpx;
+  height: 66rpx;
+}
+
+/* 页面内容 */
+.page-content {
+  position: fixed;
+  top: 110rpx;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: var(--bg-color);
+  padding: 30rpx;
+  box-sizing: border-box;
 }
 
 /* 表单项 */
@@ -23,48 +85,59 @@
   box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.08);
 }
 
-/* 表单标签 */
+.form-item.error .input,
+.form-item.error .picker {
+  border-color: #ff4444;
+}
+
 .label {
   font-size: 30rpx;
   color: var(--text-main);
   display: block;
   margin-bottom: 16rpx;
+  font-weight: 500;
 }
 
-/* 输入框 */
 .input {
   font-size: 30rpx;
   color: var(--text-light);
-  padding: 8rpx 0;
-  border-bottom: 1rpx solid var(--border-color);
+  padding: 16rpx 0;
+  height:65rpx;
+  width: 100%;
 }
 
-/* 选择器 */
 .picker {
   font-size: 30rpx;
   color: var(--text-light);
-  padding: 8rpx 0;
+  padding: 16rpx 0;
+}
+
+.picker.placeholder {
+  color: #999;
 }
 
 /* 行程活动多选样式 */
 .checkbox-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
-  margin-top: 16rpx;
+  gap: 20rpx;
+  margin-top: 20rpx;
 }
+
 .activity-item {
   display: flex;
   align-items: center;
   background-color: var(--bg-color);
-  padding: 12rpx 20rpx;
-  border-radius: 20rpx;
+  padding: 12rpx 15rpx;
+  border-radius: 15rpx;
   border: 1rpx solid var(--border-color);
-}
-.activity-item text {
-  margin-left: 8rpx;
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: var(--text-light);
+}
+
+.activity-item checkbox {
+  margin-right: 2rpx;
+  transform: scale(0.8);
 }
 
 /* 提交按钮 */
@@ -75,5 +148,211 @@
   font-size: 34rpx;
   padding: 24rpx 0;
   margin-top: 40rpx;
+  margin-bottom: 40rpx;
   border: none;
+  width: 100%;
+  font-weight: 500;
+}
+
+.submit-btn::after {
+  border: none;
+}
+
+/* 侧栏样式 */
+.sidebar-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  animation: fadeIn 0.3s ease;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 560rpx;
+  background-color: #ffffff;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease;
+  box-shadow: 2rpx 0 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+  padding: 60rpx 40rpx;
+  background: linear-gradient(135deg, #07c1a8, #6fc997);
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  margin-right: 30rpx;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 6rpx;
+}
+
+.user-welcome {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-menu {
+  flex: 1;
+  padding: 30rpx 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 40rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.menu-item:active {
+  background-color: var(--bg-color);
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  width: 60rpx;
+  margin-right: 30rpx;
+  text-align: center;
+}
+
+.menu-text {
+  font-size: 32rpx;
+  color: var(--text-main);
+}
+
+.sidebar-footer {
+  border-top: 2rpx solid var(--border-color);
+  padding: 20rpx 0;
+}
+
+/* 在侧栏样式后面添加 */
+
+/* 微信登录按钮 */
+.wechat-login-btn {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 40rpx;
+  width: 100%;
+  height: auto;
+  line-height: normal;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  font-size: 32rpx;
+  color: var(--text-main);
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.wechat-login-btn::after {
+  border: none;
+}
+
+.wechat-login-btn:active {
+  background-color: var(--bg-color);
+}
+
+.wechat-login-btn .menu-icon {
+  font-size: 40rpx;
+  width: 60rpx;
+  margin-right: 30rpx;
+  text-align: center;
+}
+
+.wechat-login-btn .menu-text {
+  font-size: 32rpx;
+  color: var(--text-main);
+}
+
+/* 登录表单样式 - 简化版 */
+.login-form {
+  padding: 30rpx 40rpx;
+}
+
+.login-input {
+  border: 1rpx solid #e0e0e0;
+  padding: 24rpx 20rpx;
+  margin: 20rpx 0;
+  border-radius: 12rpx;
+  background-color: #f8f8f8;
+  font-size: 28rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.login-input:focus {
+  border-color: var(--primary-color);
+  background-color: #ffffff;
+}
+
+.login-btn {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  margin: 30rpx 0 20rpx;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-weight: 500;
+  border: none;
+}
+
+.login-btn::after {
+  border: none;
+}
+
+.login-btn:active {
+  opacity: 0.8;
+}
+
+.register-toggle {
+  text-align: center;
+  color: var(--primary-color);
+  padding: 20rpx;
+  font-size: 28rpx;
+}
+
+.register-toggle:active {
+  opacity: 0.7;
+}
+
+/* 动画 */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 滚动条样式 */
+.page-content::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
 }

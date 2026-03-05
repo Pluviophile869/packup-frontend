@@ -1,0 +1,222 @@
+/* template_detail.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #F7FFFC; /* 极浅绿色背景 */
+}
+
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 110rpx;
+  background-color: #ffffff; /* 保持白色 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.back-icon {
+  font-size: 40rpx;
+  color: #333;
+}
+
+.title {
+  flex: 1;
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #48c4bf;
+}
+
+.action-btn {
+  padding: 12rpx 30rpx;
+  background-color: #48c4bf;
+  border-radius: 40rpx;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.action-icon {
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+/* 模板基本信息 - 白色名片效果 */
+.template-info {
+  background-color: #ffffff; /* 保持白色 */
+  padding: 40rpx 30rpx;
+  margin: 130rpx 30rpx 20rpx 30rpx; /* 上边距130rpx(避开header)+左右边距30rpx */
+  border-radius: 24rpx; /* 添加圆角，更像名片 */
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05); /* 添加阴影增强立体感 */
+}
+
+.template-name {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.template-desc {
+  font-size: 28rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 30rpx;
+}
+
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.tag-item {
+  padding: 8rpx 24rpx;
+  background-color: #e8f5f2;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #48c4bf;
+}
+
+.custom-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.custom-tag {
+  padding: 6rpx 20rpx;
+  background-color: #f0f0f0;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 分类列表 */
+.categories-list {
+  padding: 0 30rpx 30rpx 30rpx;
+}
+
+.category-item {
+  background-color: #ffffff; /* 保持白色 */
+  border-radius: 24rpx;
+  margin-bottom: 30rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  background-color: #ffffff;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.category-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.category-count {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.items-list {
+  padding: 20rpx;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 2rpx solid #f8f9fa;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-checkbox {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.checkbox-icon {
+  font-size: 36rpx;
+  color: #ccc;
+}
+
+.item-checkbox.checked .checkbox-icon {
+  color: #48c4bf;
+}
+
+.item-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.item-count {
+  font-size: 26rpx;
+  color: #999;
+  margin-left: 20rpx;
+}
+
+/* 底部统计 - 保持白色 */
+.footer-stat {
+  padding: 30rpx;
+  text-align: center;
+  border-top: 2rpx solid #f0f0f0;
+  background-color: #ffffff; /* 保持白色 */
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  margin: 0 30rpx 30rpx 30rpx; /* 添加左右边距，和卡片对齐 */
+  border-radius: 24rpx; /* 添加圆角 */
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.03); /* 添加上方阴影 */
+}
+
+.total-items {
+  font-size: 28rpx;
+  color: #48c4bf;
+  font-weight: 500;
+  margin-right: 20rpx;
+}
+
+.create-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 添加占位元素，确保内容不被fixed header完全遮挡 */
+.content-placeholder {
+  height: 110rpx; /* 等于fixed-header的高度 */
+  width: 100%;
+  background-color: transparent; /* 透明，让背景显示 */
+}

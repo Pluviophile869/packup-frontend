@@ -1,23 +1,16 @@
-<view class="container">
-  <!-- 旅行信息卡片 -->
-  <view class="info-card">
-    <view class="info-title">✅ 你的旅行信息</view>
-    <view class="info-item">📍 目的地：{{place}}</view>
-    <view class="info-item">🕰️ 日期：{{date}}</view>
-    <view class="info-item">📅 时长：{{days}} 天</view>
-    <view class="info-item">🌤️ 天气：{{weatherList[weatherIndex]}}</view>
-    <view class="info-item">🎯 类型：{{typeList[typeIndex]}}</view>
-    <view class="info-item">🏃 行程：{{activities}}</view>
-    <view class="info-item">🧑 体质：{{physiqueList[physiqueIndex]}}</view>
-  </view>
-
+<view class="fixed-header">
   <!-- 行李清单标题 -->
   <view class="luggage-title">
     <text class="title-icon">🧳</text>
     <text class="title-text">行李清单</text>
-    <text class="title-count">{{totalItems}}件物品</text>
+    <view class="header-right">
+      <text class="title-count">{{totalItems}}件物品</text>
+    </view>
+    
   </view>
+</view>
 
+<view class="container">
   <!-- 分类行李清单 -->
   <view class="list-container">
     <view class="category" wx:for="{{listCategories}}" wx:key="title" wx:for-index="categoryIndex">
@@ -99,8 +92,6 @@
 
   <!-- 底部按钮 -->
   <view class="btn-group">
-    <button class="save-btn" bindtap="saveAsTemplate">保存为模板</button>
     <button class="share-btn" open-type="share">分享清单</button>
-    <button class="back-btn" bindtap="goBack">重新生成</button>
   </view>
 </view>

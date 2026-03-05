@@ -1,0 +1,60 @@
+<!-- template_detail.wxml -->
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="fixed-header">
+    <text class="title">模板详情</text>
+    <view class="action-btn" bindtap="useTemplate">
+      <text class="action-icon">使用</text>
+    </view>
+  </view>
+
+  <!-- 模板基本信息 -->
+  <view class="template-info">
+    <text class="template-name">{{template.name}}</text>
+    <text class="template-desc">{{template.description}}</text>
+    
+    <view class="info-tags">
+      <view class="tag-item" wx:if="{{template.type}}">
+        <text>{{template.type}}</text>
+      </view>
+      <view class="tag-item" wx:if="{{template.destination}}">
+        <text>📍 {{template.destination}}</text>
+      </view>
+      <view class="tag-item" wx:if="{{template.days}}">
+        <text>📅 {{template.days}}天</text>
+      </view>
+    </view>
+
+    <!-- 自定义标签 -->
+    <view class="custom-tags" wx:if="{{template.tags && template.tags.length > 0}}">
+      <view class="custom-tag" wx:for="{{template.tags}}" wx:key="index">
+        <text>#{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 物品清单分类 -->
+  <view class="categories-list">
+    <view class="category-item" wx:for="{{listCategories}}" wx:key="index">
+      <view class="category-header">
+        <text class="category-title">{{item.title}}</text>
+        <text class="category-count">{{item.items.length}}件物品</text>
+      </view>
+      
+      <view class="items-list">
+        <view class="item-row" wx:for="{{item.items}}" wx:key="idx" data-item="{{item}}">
+          <view class="item-checkbox {{item.checked ? 'checked' : ''}}">
+            <text class="checkbox-icon">{{item.checked ? '✓' : '○'}}</text>
+          </view>
+          <text class="item-name {{item.checked ? 'checked' : ''}}">{{item.name}}</text>
+          <text class="item-count" wx:if="{{item.count}}">x{{item.count}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部统计 -->
+  <view class="footer-stat">
+    <text class="total-items">共计 {{totalItems}} 件物品</text>
+  </view>
+</view>
