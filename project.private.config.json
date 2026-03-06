@@ -3,7 +3,7 @@
   "projectname": "Packup",
   "setting": {
     "compileHotReLoad": true,
-    "urlCheck": false, 
+    "urlCheck": false,
     "coverView": true,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,
@@ -20,17 +20,5 @@
     "useApiHostProcess": true
   },
   "libVersion": "3.14.2",
-  "condition": {
-    "miniprogram": {
-      "list": [
-        {
-          "name": "测试登录接口",
-          "pathName": "pages/index/index",
-          "query": "",
-          "scene": 1000,
-          "launchMode": "default"
-        }
-      ]
-    }
-  }
+  "condition": {}
 }

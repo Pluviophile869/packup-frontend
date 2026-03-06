@@ -131,7 +131,7 @@
       
       <view class="form-item">
         <text class="label">目的地 <text class="required">*</text></text>
-        <input class="input" placeholder="例如：三亚" bindinput="onDestinationInput" value="{{formData.destination}}" />
+        <input class="input" placeholder="例如：三亚" bindinput="onDestinationsInput" value="{{formData.destination}}" />
       </view>
       
       <view class="form-row">
@@ -154,68 +154,6 @@
           <view class="picker">{{typeList[formData.typeIndex] || '选择类型'}}</view>
         </picker>
       </view>
-      
-      <view class="form-item">
-        <text class="label">活动描述</text>
-        <input class="input" placeholder="例如：海边度假、登山徒步" bindinput="onActivitiesInput" value="{{formData.activities}}" />
-      </view>
-      
-      <view class="form-row">
-        <view class="form-item half">
-          <text class="label">天气</text>
-          <picker bindchange="onWeatherChange" value="{{formData.weather}}" range="{{weatherList}}">
-            <view class="picker">{{weatherList[formData.weather] || '选择天气'}}</view>
-          </picker>
-        </view>
-        
-        <view class="form-item half">
-          <text class="label">体质</text>
-          <picker bindchange="onPhysiqueChange" value="{{formData.physique}}" range="{{physiqueList}}">
-            <view class="picker">{{physiqueList[formData.physique] || '选择体质'}}</view>
-          </picker>
-        </view>
-      </view>
-      
-      <!-- 标签选择器 - 点击选中/取消，选中时变深色 -->
-      <view class="form-item">
-        <text class="label">选择标签</text>
-        <view class="tags-selector-container">
-          <!-- 显示已选标签 -->
-          <view class="selected-tags" wx:if="{{formData.tags && formData.tags.length > 0}}">
-            <view class="selected-tag" wx:for="{{formData.tags}}" wx:key="index" wx:if="{{item}}">
-              <text class="selected-tag-text">{{item}}</text>
-              <text class="selected-tag-remove" catchtap="removeTag" data-tag="{{item}}">✕</text>
-            </view>
-          </view>
-          
-          <!-- 可选择的标签列表 -->
-          <view class="tags-list">
-            <!-- 默认标签 - 点击切换选中状态 -->
-            <view class="tab-item {{formData.tags && formData.tags.includes(item) ? 'active' : ''}}" 
-                  wx:for="{{defaultTabs}}" 
-                  wx:key="index"
-                  catchtap="toggleTag"
-                  data-tag="{{item}}">
-              <text>{{item}}</text>
-            </view>
-            
-            <!-- 自定义标签 - 点击切换选中状态 -->
-            <view class="tab-item {{formData.tags && formData.tags.includes(item) ? 'active' : ''}}" 
-                  wx:for="{{customTabs}}" 
-                  wx:key="index"
-                  catchtap="toggleTag"
-                  data-tag="{{item}}">
-              <text>{{item}}</text>
-            </view>
-            
-            <!-- 添加新标签按钮 -->
-            <view class="add-tag-btn-small" bindtap="showAddTabModal">
-              <text class="add-icon-small">+</text>
-            </view>
-          </view>
-        </view>
-      </view>
-      
     </scroll-view>
     
     <view class="modal-footer">

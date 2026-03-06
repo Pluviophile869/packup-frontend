@@ -113,7 +113,7 @@
   <view class="sidebar-header">
     <image src="/images/avatar.png" mode="aspectFill" class="sidebar-avatar"></image>
     <view class="sidebar-user-info">
-      <text class="user-name">旅行者</text>
+      <text class="user-name">{{userName}}</text>
     </view>
   </view>
   

@@ -23,7 +23,8 @@ Page({
     physiqueList: ['无特殊情况', '怕热', '怕冷', '鼻炎/过敏', '易晕车/晕船'],
     showSidebar: false,
     errors: {},
-    userId: null,     
+    userId: null,
+    userName: '旅行者', // 添加用户名字段，默认值
     isLoading: false
   },
 
@@ -42,10 +43,50 @@ Page({
       endDate: next.toISOString().split('T')[0]
     });
 
-    // 从缓存获取用户ID
+    // 从缓存获取用户信息
+    this.getUserInfo();
+  },
+
+  onShow() {
+    // 每次显示页面时重新获取用户信息（确保最新）
+    this.getUserInfo();
+  },
+
+  // 获取用户信息
+  getUserInfo() {
     const userInfo = wx.getStorageSync('userInfo');
-    if (userInfo && userInfo.id) {
-      this.setData({ userId: userInfo.id });
+    console.log('从缓存获取的用户信息:', userInfo);
+    
+    if (userInfo) {
+      // 获取用户名 - 根据你的后端返回结构调整
+      let userName = '旅行者';
+      
+      // 尝试多种可能的字段名
+      if (userInfo.username) {
+        userName = userInfo.username;
+      } else if (userInfo.data?.username) {
+        userName = userInfo.data.username;
+      } else if (userInfo.user?.username) {
+        userName = userInfo.user.username;
+      } else if (userInfo.nickName) {
+        userName = userInfo.nickName;
+      } else if (userInfo.nickname) {
+        userName = userInfo.nickname;
+      } else if (userInfo.name) {
+        userName = userInfo.name;
+      }
+      
+      this.setData({ 
+        userId: userInfo.id || userInfo.userId || userInfo.data?.id,
+        userName: userName
+      });
+      
+      console.log('设置的用户名:', userName);
+    } else {
+      this.setData({ 
+        userId: null,
+        userName: '旅行者'
+      });
     }
   },
 
@@ -105,7 +146,7 @@ Page({
   // 计算结束日期
   calculateEndDate(startDate, days) {
     const date = new Date(startDate);
-    date.setDate(date.getDate() + parseInt(days));
+    date.setDate(date.getDate() + parseInt(days) - 1);
     return date.toISOString().split('T')[0];
   },
 
@@ -144,10 +185,12 @@ Page({
         destinations: [{
           cityName: this.data.place,
           country: "中国",
+          poiName: null,
           arrivalDate: this.data.date,
           departureDate: this.calculateEndDate(this.data.date, this.data.days),
           orderIndex: 0
-        }]
+        }],
+        activities: this.data.activities,
       };
 
       console.log('【1.发送的行程数据】', tripData);
@@ -240,6 +283,7 @@ Page({
           wx.removeStorageSync('token');
           this.setData({ 
             userId: null, 
+            userName: '旅行者', // 重置用户名
             showSidebar: false 
           });
           wx.showToast({ title: '已退出登录', icon: 'success' });
