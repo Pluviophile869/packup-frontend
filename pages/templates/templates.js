@@ -2,7 +2,9 @@
 import {
   getTripsByUserId,
   getTripById,
-  deleteTrip  // 导入删除行程的 API
+  deleteTrip,
+  updateTrip,
+  createTrip
 } from '../../api/user';
 
 Page({
@@ -141,12 +143,15 @@ Page({
             days = item.travelDays;
           }
 
-          // 获取城市名称
+          // 获取城市名称（用于显示）
           let cityName = '';
           
-          // 从 destinations 数组中获取
-          if (item.destinations && Array.isArray(item.destinations) && item.destinations.length > 0) {
-            const cityNames = item.destinations
+          // 重要：先检查是否有原始的 destinations 数组
+          const rawDestinations = item.destinations || [];
+          
+          // 从 destinations 数组中获取城市名称字符串
+          if (rawDestinations.length > 0) {
+            const cityNames = rawDestinations
               .map(dest => {
                 if (dest.cityName) return dest.cityName;
                 if (dest.city) return dest.city;
@@ -179,10 +184,11 @@ Page({
             cityName = '未指定目的地';
           }
 
+          // 返回完整数据，保留原始的 destinations 数组
           return {
             id: item.id,
             tripName: item.tripName || '未命名行程',
-            cityName: cityName,
+            cityName: cityName,  // 用于显示的字符串
             startDate: item.startDate || '',
             endDate: item.endDate || '',
             days: days || '?',
@@ -191,7 +197,8 @@ Page({
             weather: item.weather || '',
             physique: item.physique || '',
             createTime: item.createdTime ? item.createdTime.split('T')[0] : new Date().toISOString().split('T')[0],
-            destinations: item.destinations || []
+            // 保留完整的原始 destinations 数组，用于编辑
+            destinations: rawDestinations
           };
         });
 
@@ -480,23 +487,41 @@ Page({
     });
   },
 
-  // 编辑行程
+  // 编辑行程 - 修复版本
   editTrip(e) {
     const tripId = e.currentTarget.dataset.id;
     const trip = this.data.trips.find(t => t.id === tripId);
     
     if (trip) {
+      console.log('编辑行程，原始数据:', trip);
+      
       const typeIndex = this.data.typeList.indexOf(trip.type) >= 0 
         ? this.data.typeList.indexOf(trip.type) 
         : 0;
       
+      // 处理目的地数据
       let destinations = [];
-      if (trip.cityName && trip.cityName !== '未指定目的地') {
-        const cityNames = trip.cityName.split(/[、,]/).map(name => name.trim());
-        destinations = cityNames.map(name => ({ cityName: name }));
-      } else if (trip.destinations && trip.destinations.length > 0) {
+      
+      if (trip.destinations && Array.isArray(trip.destinations) && trip.destinations.length > 0) {
+        // 有原始的 destinations 数组，直接使用（可能已经包含完整字段）
         destinations = trip.destinations;
+        console.log('使用原始 destinations:', destinations);
+      } else if (trip.cityName && trip.cityName !== '未指定目的地') {
+        // 只有 cityName 字符串，创建基础格式
+        const cityNames = trip.cityName.split(/[、,]/).map(name => name.trim()).filter(name => name);
+        destinations = cityNames.map((name, index) => ({
+          cityName: name,
+          country: '中国',  // 默认值
+          arrivalDate: trip.startDate || '',
+          departureDate: trip.endDate || '',
+          orderIndex: index + 1
+        }));
+        console.log('从 cityName 创建 destinations:', destinations);
       }
+      
+      // 获取天气和体质的索引
+      const weatherIndex = this.getWeatherIndex(trip.weather);
+      const physiqueIndex = this.getPhysiqueIndex(trip.physique);
       
       this.setData({
         showModal: true,
@@ -511,8 +536,8 @@ Page({
           days: trip.days || '',
           typeIndex: typeIndex,
           activities: trip.activities || '',
-          weather: this.getWeatherIndex(trip.weather) || 0,
-          physique: this.getPhysiqueIndex(trip.physique) || 0
+          weather: weatherIndex,
+          physique: physiqueIndex
         }
       });
     }
@@ -554,7 +579,7 @@ Page({
   },
 
   /**
-   * 执行删除行程 - 完善版本
+   * 执行删除行程
    * @param {number} tripId - 行程ID
    */
   doDeleteTrip(tripId) {
@@ -588,7 +613,6 @@ Page({
         console.error('删除行程失败：', error);
         wx.hideLoading();
         
-        // 根据错误类型显示不同的提示
         let errorMsg = '删除失败，请重试';
         if (error && error.message) {
           errorMsg = error.message;
@@ -650,28 +674,72 @@ Page({
     this.setData({ 'formData.tripName': e.detail.value });
   },
 
+  // 目的地输入处理 - 把用户输入的字符串转成完整的 destinations 数组
   onDestinationsInput(e) {
     const inputValue = e.detail.value;
     const cityNames = inputValue.split(/[，,]/).map(name => name.trim()).filter(name => name);
-    const destinations = cityNames.map(name => ({ cityName: name }));
+    
+    // 创建完整的 destinations 数组，包含所有必要字段
+    const destinations = cityNames.map((name, index) => {
+      // 检查是否已有该城市的数据（用于编辑时保留原有数据）
+      const existingDest = this.data.formData.destinations.find(d => d.cityName === name);
+      
+      if (existingDest) {
+        // 如果已有，保留原有数据
+        return existingDest;
+      } else {
+        // 如果是新的，创建完整格式
+        return {
+          cityName: name,
+          country: '中国',
+          arrivalDate: this.data.formData.startDate || '',
+          departureDate: this.data.formData.endDate || '',
+          orderIndex: index + 1
+        };
+      }
+    });
+    
+    console.log('目的地输入转换:', inputValue, '->', destinations);
     
     this.setData({ 
       'formData.destinations': destinations 
     });
   },
 
-  // 获取显示用的目的地字符串
+  // 获取显示用的目的地字符串（用于输入框显示）
   getDestinationsDisplay() {
     const destinations = this.data.formData.destinations || [];
     return destinations.map(d => d.cityName).join('、');
   },
 
   onStartDateInput(e) {
-    this.setData({ 'formData.startDate': e.detail.value });
+    const startDate = e.detail.value;
+    
+    // 更新 destinations 中的 arrivalDate
+    const destinations = this.data.formData.destinations.map(dest => ({
+      ...dest,
+      arrivalDate: startDate
+    }));
+    
+    this.setData({ 
+      'formData.startDate': startDate,
+      'formData.destinations': destinations
+    });
   },
 
   onEndDateInput(e) {
-    this.setData({ 'formData.endDate': e.detail.value });
+    const endDate = e.detail.value;
+    
+    // 更新 destinations 中的 departureDate
+    const destinations = this.data.formData.destinations.map(dest => ({
+      ...dest,
+      departureDate: endDate
+    }));
+    
+    this.setData({ 
+      'formData.endDate': endDate,
+      'formData.destinations': destinations
+    });
   },
 
   onDaysInput(e) {
@@ -695,10 +763,13 @@ Page({
     this.setData({ 'formData.physique': parseInt(e.detail.value) });
   },
 
-  // 保存行程
+  /**
+   * 保存行程 - 修复版本，完全匹配后端接口
+   */
   saveTrip() {
     const formData = this.data.formData;
     
+    // 表单验证
     if (!formData.tripName.trim()) {
       wx.showToast({ title: '请输入行程名称', icon: 'none' });
       return;
@@ -719,65 +790,117 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: '保存中...' });
+    wx.showLoading({ title: '保存中...', mask: true });
 
+    // 计算结束日期
+    const endDate = this.calculateEndDate(formData.startDate, formData.days);
+
+    // 按照接口要求的格式准备数据
     const tripData = {
-      userId: this.data.userId,
+      userId: this.data.userId, 
       tripName: formData.tripName.trim(),
       startDate: formData.startDate,
-      endDate: this.calculateEndDate(formData.startDate, formData.days),
-      destinations: formData.destinations,
-      tripType: this.data.typeList[formData.typeIndex],
-      activities: formData.activities || '',
-      weather: this.data.weatherList[formData.weather] || '',
-      physique: this.data.physiqueList[formData.physique] || ''
+      endDate: endDate,
+      // 确保 destinations 数组中的每个对象都有完整字段
+      destinations: formData.destinations.map((dest, index) => {
+        return {
+          id: null,
+          tripId: null,
+          cityName: dest.cityName,
+          country: dest.country || '中国',
+          poiName: null,
+          arrivalDate: dest.arrivalDate || formData.startDate,
+          departureDate: dest.departureDate || endDate,
+          orderIndex: dest.orderIndex || index + 1
+        };
+      })
     };
 
-    if (formData.id) {
-      tripData.id = formData.id;
+    // 判断是编辑还是新增
+    const isEdit = !!formData.id;
+    
+    if (isEdit) {
+      // 编辑模式：调用 updateTrip
+      console.log('【编辑模式】发送到后端的完整数据:', JSON.stringify(tripData, null, 2));
+      console.log('【编辑模式】行程ID:', formData.id);
+      
+      updateTrip(formData.id, tripData)
+        .then(res => {
+          console.log('更新行程成功:', res);
+          wx.hideLoading();
+          
+          // 更新成功后，刷新列表
+          this.setData({ 
+            showModal: false,
+            page: 1
+          }, () => {
+            this.loadTrips();
+          });
+          
+          wx.showToast({
+            title: '更新成功',
+            icon: 'success',
+            duration: 1500
+          });
+        })
+        .catch(error => {
+          console.error('更新行程失败:', error);
+          console.error('错误详情:', JSON.stringify(error));
+          wx.hideLoading();
+          
+          let errorMsg = '更新失败，请重试';
+          if (error && error.message) {
+            errorMsg = error.message;
+          } else if (error && error.errMsg) {
+            errorMsg = error.errMsg;
+          }
+          
+          wx.showToast({
+            title: errorMsg,
+            icon: 'none',
+            duration: 2000
+          });
+        });
+    } else {
+      // 新增模式：调用 createTrip
+      console.log('【新增模式】发送到后端的完整数据:', JSON.stringify(tripData, null, 2));
+      
+      createTrip(tripData)
+        .then(res => {
+          console.log('创建行程成功:', res);
+          wx.hideLoading();
+          
+          this.setData({ 
+            showModal: false,
+            page: 1
+          }, () => {
+            this.loadTrips();
+          });
+          
+          wx.showToast({
+            title: '创建成功',
+            icon: 'success',
+            duration: 1500
+          });
+        })
+        .catch(error => {
+          console.error('创建行程失败:', error);
+          wx.hideLoading();
+          
+          let errorMsg = '创建失败，请重试';
+          if (error && error.message) {
+            errorMsg = error.message;
+          } else if (error && error.errMsg) {
+            errorMsg = error.errMsg;
+          }
+          
+          wx.showToast({
+            title: errorMsg,
+            icon: 'none',
+            duration: 2000
+          });
+        });
     }
-
-    console.log('保存的行程数据:', tripData);
-
-    setTimeout(() => {
-      wx.hideLoading();
-      
-      const displayTrip = {
-        id: formData.id || Date.now(),
-        tripName: tripData.tripName,
-        cityName: formData.destinations.map(d => d.cityName).join('、'),
-        startDate: tripData.startDate,
-        endDate: tripData.endDate,
-        days: formData.days,
-        type: tripData.tripType,
-        activities: tripData.activities,
-        weather: tripData.weather,
-        physique: tripData.physique,
-        destinations: formData.destinations,
-        createTime: new Date().toISOString().split('T')[0]
-      };
-      
-      let trips = this.data.trips;
-      let newTrips;
-      
-      if (this.data.currentTripId) {
-        newTrips = trips.map(t => t.id === this.data.currentTripId ? displayTrip : t);
-      } else {
-        newTrips = [displayTrip, ...trips];
-      }
-      
-      this.setData({ 
-        showModal: false,
-        trips: newTrips
-      }, () => {
-        this.filterTrips();
-      });
-
-      wx.showToast({
-        title: '保存成功',
-        icon: 'success'
-      });
-    }, 500);
   },
 
   // 计算结束日期

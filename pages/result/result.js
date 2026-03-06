@@ -807,6 +807,7 @@ Page({
         destinations: [{
           cityName: this.data.place,
           country: "中国",
+          poiName: null,
           arrivalDate: this.data.date,
           departureDate: endDate,
           orderIndex: 0
