@@ -5,7 +5,8 @@ import {
   getPackingItemsByTrip,
   saveTripAsTemplate,
   applyTemplate,
-  getAllTemplates
+  getAllTemplates,
+  createTemplate
 } from '../../api/user';
 
 Page({
@@ -18,7 +19,16 @@ Page({
     tripId: null,
     isFromServer: false, // 标记数据是否来自服务器
     templateInfo: null,   // 模板信息
-    tripInfo: null        // 行程信息
+    tripInfo: null,        // 行程信息
+    
+    // 添加和result页相同的辅助数据
+    weatherList: ['晴天', '雨天', '寒冷', '炎热'],
+    typeList: ['休闲旅行', '户外徒步', '商务出行'],
+    physiqueList: ['无特殊情况', '怕热', '怕冷', '鼻炎/过敏', '易晕车/晕船'],
+    
+    // 分类显示名称映射
+    categoryDisplayNames: {},
+    availableCategories: []
   },
 
   onLoad(options) {
@@ -38,7 +48,7 @@ Page({
       console.log('设置的tripId：', this.data.tripId);
       
       if (tripId) {
-        // 如果有行程ID，从服务器加载行程详情
+        // 如果有行程ID，从服务器加载行程详情（使用和result页一样的方式）
         this.loadTripDetail(tripId);
       } else if (templateId) {
         // 如果有模板ID，加载模板详情
@@ -59,70 +69,242 @@ Page({
   },
 
   /**
-   * 加载行程详情（从trip接口获取）
+   * 加载行程详情 - 修改为和result页一样的方式
    * @param {number} tripId - 行程ID
    */
   async loadTripDetail(tripId) {
     this.setData({ isLoading: true });
     
     try {
-      console.log('开始加载行程详情，tripId:', tripId);
+      console.log('========== 开始加载行程数据 ==========');
+      console.log('【1. 请求的tripId】:', tripId);
       
-      // 1. 从trip接口获取行程信息
+      // 获取行程详情
+      console.log('【2. 开始请求行程接口】');
       const tripRes = await getTripById(tripId);
-      console.log('行程详情返回：', tripRes);
+      console.log('【3. 行程接口返回】:', tripRes);
       
-      // 处理返回数据格式
-      let trip = tripRes;
+      // 处理行程数据
+      let trip = null;
       if (tripRes && tripRes.data) {
         trip = tripRes.data;
+      } else if (tripRes && tripRes.success && tripRes.data) {
+        trip = tripRes.data;
+      } else {
+        trip = tripRes;
       }
       
-      if (!trip) {
-        throw new Error('行程不存在');
+      if (trip) {
+        console.log('【4. 处理后的行程】:', trip);
+        this.setData({
+          tripInfo: trip
+        });
       }
       
-      // 2. 从打包物品接口获取物品列表
+      // 获取打包物品列表 - 和result页完全一样的处理逻辑
+      console.log('【5. 开始请求物品接口】');
       const itemsRes = await getPackingItemsByTrip(tripId);
-      console.log('打包物品返回：', itemsRes);
-      
-      // 处理返回数据格式
-      let items = itemsRes;
-      if (itemsRes && itemsRes.data) {
-        items = itemsRes.data;
-      } else if (itemsRes && itemsRes.records) {
-        items = itemsRes.records;
+      console.log('【6. 物品接口原始返回】:', itemsRes);
+
+      // --- 和result页完全一样的数据处理逻辑 ---
+      let items = [];
+      if (itemsRes) {
+        // 情况1: {success: true, data: [...]}
+        if (itemsRes.success === true && itemsRes.data && Array.isArray(itemsRes.data)) {
+          items = itemsRes.data;
+          console.log('【7.1 识别为 success.data 格式】, 物品数量:', items.length);
+        } 
+        // 情况2: 直接返回数组
+        else if (Array.isArray(itemsRes)) {
+          items = itemsRes;
+          console.log('【7.2 识别为 直接数组 格式】, 物品数量:', items.length);
+        }
+        // 情况3: 返回对象包含 data 字段且 data 是数组
+        else if (itemsRes.data && Array.isArray(itemsRes.data)) {
+          items = itemsRes.data;
+          console.log('【7.3 识别为 data 数组 格式】, 物品数量:', items.length);
+        }
+        // 情况4: 返回对象包含 records 字段且 records 是数组
+        else if (itemsRes.records && Array.isArray(itemsRes.records)) {
+          items = itemsRes.records;
+          console.log('【7.4 识别为 records 数组 格式】, 物品数量:', items.length);
+        }
+        else {
+          console.log('【7.5 未识别的格式，尝试将整个返回视为物品列表】');
+          items = Array.isArray(itemsRes) ? itemsRes : [];
+        }
+      } else {
+        console.log('【7.6 itemsRes 为空】');
+        items = [];
       }
+      // ---------------------------------------------
+
+      console.log('【8. 最终物品数组】:', items);
+      console.log('【9. 物品数量】:', items.length);
       
-      // 保存行程信息
-      this.setData({ tripInfo: trip });
+      // 从物品中提取分类 - 使用和result页相同的辅助函数
+      const categories = this.extractCategoriesFromItems(items);
+      console.log('【10. 提取的分类】:', categories);
       
-      // 3. 构建模板对象 - 行程信息从trip获取
+      const categoryDisplayNames = this.generateCategoryDisplayNames(categories);
+      console.log('【11. 分类显示名称映射】:', categoryDisplayNames);
+      
+      // 转换物品为分类格式 - 使用和result页相同的辅助函数
+      console.log('【12. 开始转换物品为分类格式】');
+      const listCategories = this.convertItemsToCategories(items, categoryDisplayNames);
+      console.log('【13. 转换后的分类数据】:', listCategories.map(cat => ({
+        title: cat.title,
+        originalCategory: cat.originalCategory,
+        count: cat.items.length
+      })));
+      
+      // 计算总物品数
+      const totalItems = this.calculateTotalItems(listCategories);
+      console.log('【14. 总物品数】:', totalItems);
+      
+      // 构建模板对象
       const template = this.buildTemplateFromTrip(trip, items, tripId);
       
-      // 4. 转换为分类格式
-      const listCategories = this.convertItemsToCategories(items);
-      const totalItems = this.calculateTotalItems(listCategories);
+      console.log('========== 数据加载完成 ==========');
       
       this.setData({
         template: template,
         listCategories: listCategories,
         totalItems: totalItems,
+        availableCategories: categories,
+        categoryDisplayNames: categoryDisplayNames,
         isLoading: false,
         isFromServer: true
       });
       
-      console.log('模板构建完成：', template);
-      console.log('分类数据：', listCategories);
-      
     } catch (error) {
-      console.error('加载行程详情失败：', error);
+      console.log('========== 错误信息 ==========');
+      console.error('【错误】加载行程详情失败:', error);
+      console.error('【错误信息】', error.message);
+      
       wx.showToast({
         title: error.message || '加载失败',
         icon: 'none'
       });
       this.setData({ isLoading: false });
     }
+  },
+
+  /**
+   * 从物品中提取所有唯一的分类 - 和result页完全一样
+   */
+  extractCategoriesFromItems(items) {
+    console.log('【extractCategoriesFromItems】输入:', items);
+    
+    const categorySet = new Set();
+    
+    if (items && Array.isArray(items)) {
+      items.forEach(item => {
+        if (item && item.category) {
+          categorySet.add(item.category);
+          console.log('添加分类:', item.category);
+        }
+      });
+    }
+    
+    // 确保至少有一个"其他物品"分类
+    if (!categorySet.has('其他物品')) {
+      categorySet.add('其他物品');
+    }
+    
+    // 如果没有提取到任何分类，返回默认分类
+    if (categorySet.size === 0 || (categorySet.size === 1 && categorySet.has('其他物品'))) {
+      console.log('使用默认分类');
+      return ['重要文件', '电子产品', '衣物', '个人护理', '药品', '防护用品', '财务', '其他物品'];
+    }
+    
+    const result = Array.from(categorySet).sort();
+    console.log('【extractCategoriesFromItems】输出:', result);
+    return result;
+  },
+
+  /**
+   * 生成分类显示名称映射 - 和result页完全一样
+   */
+  generateCategoryDisplayNames(categories) {
+    const displayNameMap = {};
+    
+    const defaultDisplayNames = {
+      '重要文件': '📄 重要证件',
+      '电子产品': '📱 电子设备',
+      '衣物': '👔 衣物推荐',
+      '个人护理': '🧴 洗漱用品',
+      '药品': '💊 健康提醒',
+      '防护用品': '🛡️ 防护用品',
+      '财务': '💰 财务用品',
+      '其他物品': '📦 其他物品',
+      '行李用品': '🧳 行李用品',
+      '洗漱用品': '🧴 洗漱用品',
+      '电子设备': '📱 电子设备',
+      '衣物鞋包': '👔 衣物推荐',
+      '洗漱护肤': '🧴 洗漱用品',
+      '药品健康': '💊 健康提醒',
+      '医疗用品': '💊 健康提醒',
+      '重要物品': '📄 重要证件'
+    };
+    
+    categories.forEach(category => {
+      displayNameMap[category] = defaultDisplayNames[category] || `📌 ${category}`;
+    });
+    
+    return displayNameMap;
+  },
+
+  /**
+   * 将后端物品转换为前端分类格式 - 和result页完全一样
+   */
+  convertItemsToCategories(items, categoryDisplayNames) {
+    console.log('【convertItemsToCategories】输入items数量:', items?.length);
+    
+    if (!items || !Array.isArray(items)) {
+      console.log('items不是数组，返回空数组');
+      return [];
+    }
+    
+    const categoriesObj = {};
+    
+    items.forEach((item, index) => {
+      const category = item.category || '其他物品';
+      
+      if (!categoriesObj[category]) {
+        categoriesObj[category] = {
+          title: (categoryDisplayNames && categoryDisplayNames[category]) || `📌 ${category}`,
+          originalCategory: category,
+          items: []
+        };
+      }
+      
+      // 处理 is_packed 字段（兼容两种字段名）- 预览时默认false
+      let isPacked = false;
+      if (item.is_packed !== undefined) {
+        isPacked = item.is_packed === 1 || item.is_packed === true;
+      } else if (item.isPacked !== undefined) {
+        isPacked = item.isPacked === 1 || item.isPacked === true;
+      }
+      
+      categoriesObj[category].items.push({
+        id: item.id,
+        name: item.name,
+        checked: false, // 预览页统一不显示选中状态
+        quantity: item.quantity || 1,
+        notes: item.notes || '',
+        originalCategory: category
+      });
+    });
+    
+    // 转换为数组并按分类名称排序
+    const result = Object.values(categoriesObj).sort((a, b) => {
+      if (a.originalCategory === '其他物品') return 1;
+      if (b.originalCategory === '其他物品') return -1;
+      return a.originalCategory.localeCompare(b.originalCategory);
+    });
+    
+    return result;
   },
 
   /**
@@ -198,7 +380,7 @@ Page({
       startDate: trip.startDate || '',
       endDate: trip.endDate || '',
       
-      // 物品列表
+      // 物品列表 - 存储原始物品数组
       items: items || [],
       
       // 时间戳
@@ -259,7 +441,7 @@ Page({
         // 保存模板信息
         this.setData({ templateInfo: template });
         
-        // 如果有关联的行程ID，加载行程详情
+        // 如果有关联的行程ID，优先加载行程详情（使用统一的数据处理方式）
         if (template.tripId) {
           try {
             await this.loadTripDetail(template.tripId);
@@ -295,8 +477,15 @@ Page({
     // 获取模板中的物品列表
     let items = template.items || [];
     
-    // 智能判断模板格式并转换为统一的分类格式
-    const listCategories = this.normalizeCategories(template);
+    // 从物品中提取分类 - 使用和result页相同的辅助函数
+    const categories = this.extractCategoriesFromItems(items);
+    console.log('提取的分类:', categories);
+    
+    const categoryDisplayNames = this.generateCategoryDisplayNames(categories);
+    console.log('分类显示名称映射:', categoryDisplayNames);
+    
+    // 转换物品为分类格式 - 使用和result页相同的辅助函数
+    const listCategories = this.convertItemsToCategories(items, categoryDisplayNames);
     const totalItems = this.calculateTotalItems(listCategories);
     
     // 构建显示的模板对象
@@ -317,6 +506,8 @@ Page({
       template: displayTemplate,
       listCategories: listCategories,
       totalItems: totalItems,
+      availableCategories: categories,
+      categoryDisplayNames: categoryDisplayNames,
       isLoading: false,
       isFromServer: true
     });
@@ -359,8 +550,15 @@ Page({
         // 获取模板中的物品列表
         let items = template.items || [];
         
-        // 智能判断模板格式并转换为统一的分类格式
-        const listCategories = this.normalizeCategories(template);
+        // 从物品中提取分类 - 使用和result页相同的辅助函数
+        const categories = this.extractCategoriesFromItems(items);
+        console.log('提取的分类:', categories);
+        
+        const categoryDisplayNames = this.generateCategoryDisplayNames(categories);
+        console.log('分类显示名称映射:', categoryDisplayNames);
+        
+        // 转换物品为分类格式 - 使用和result页相同的辅助函数
+        const listCategories = this.convertItemsToCategories(items, categoryDisplayNames);
         const totalItems = this.calculateTotalItems(listCategories);
         
         // 构建显示的模板对象
@@ -382,6 +580,8 @@ Page({
           template: displayTemplate,
           listCategories: listCategories,
           totalItems: totalItems,
+          availableCategories: categories,
+          categoryDisplayNames: categoryDisplayNames,
           isLoading: false,
           isFromServer: false
         });
@@ -409,132 +609,6 @@ Page({
       });
       this.setData({ isLoading: false });
     }
-  },
-
-  /**
-   * 将后端物品转换为前端分类格式
-   * @param {Array} items - 物品列表
-   * @returns {Array} 分类后的物品列表
-   */
-  convertItemsToCategories(items) {
-    // 定义默认分类
-    const categoryMap = {
-      '衣物鞋包': '👔 衣物推荐',
-      '洗漱护肤': '🧴 洗漱用品',
-      '电子设备': '📱 电子设备',
-      '药品健康': '💊 健康提醒',
-      '重要文件': '📄 重要证件',
-      '其他物品': '📦 其他物品'
-    };
-    
-    const categories = {};
-    
-    // 初始化分类
-    Object.keys(categoryMap).forEach(key => {
-      categories[key] = {
-        title: categoryMap[key],
-        items: []
-      };
-    });
-
-    // 根据物品分类放入对应数组
-    if (items && items.length) {
-      items.forEach(item => {
-        const category = item.category || '其他物品';
-        if (categories[category]) {
-          categories[category].items.push({
-            id: item.id,
-            name: item.name,
-            checked: false, // 预览时默认未选中
-            quantity: item.quantity || 1,
-            notes: item.notes || ''
-          });
-        } else {
-          // 未知分类放入其他物品
-          categories['其他物品'].items.push({
-            id: item.id,
-            name: item.name,
-            checked: false,
-            quantity: item.quantity || 1,
-            notes: item.notes || ''
-          });
-        }
-      });
-    }
-
-    // 返回非空分类数组
-    return Object.values(categories).filter(cat => cat.items.length > 0);
-  },
-
-  /**
-   * 统一转换为分类格式 - 兼容多种数据格式
-   * @param {Object} template - 模板对象
-   * @returns {Array} 分类后的物品列表
-   */
-  normalizeCategories(template) {
-    // 情况1：已经有categories字段（完整分类格式）
-    if (template.categories && Array.isArray(template.categories) && template.categories.length > 0) {
-      return template.categories.map(category => ({
-        title: category.title || '📦 物品清单',
-        items: (category.items || []).map(item => ({
-          id: item.id,
-          name: typeof item === 'string' ? item : (item.name || ''),
-          checked: false,
-          quantity: item.quantity || 1,
-          notes: item.notes || ''
-        }))
-      }));
-    }
-    
-    // 情况2：有items字段且是分类格式（items直接存储分类数组）
-    if (template.items && Array.isArray(template.items) && template.items.length > 0) {
-      // 检查是否是分类格式（第一个元素有title属性）
-      if (template.items[0] && template.items[0].title !== undefined) {
-        return template.items.map(category => ({
-          title: category.title || '📦 物品清单',
-          items: (category.items || []).map(item => ({
-            id: item.id,
-            name: typeof item === 'string' ? item : (item.name || ''),
-            checked: false,
-            quantity: item.quantity || 1,
-            notes: item.notes || ''
-          }))
-        }));
-      }
-      
-      // 情况3：items是对象数组（有name属性）
-      if (template.items[0] && typeof template.items[0] === 'object' && template.items[0].name !== undefined) {
-        return [{
-          title: '📦 物品清单',
-          items: template.items.map(item => ({
-            id: item.id,
-            name: item.name || '',
-            checked: false,
-            quantity: item.quantity || 1,
-            notes: item.notes || ''
-          }))
-        }];
-      }
-      
-      // 情况4：items是简单字符串数组
-      if (typeof template.items[0] === 'string') {
-        return [{
-          title: '📦 物品清单',
-          items: template.items.map(name => ({
-            name: name,
-            checked: false,
-            quantity: 1,
-            notes: ''
-          }))
-        }];
-      }
-    }
-    
-    // 情况5：没有items，尝试从其他字段构建
-    return [{
-      title: '📦 物品清单',
-      items: []
-    }];
   },
 
   /**
@@ -691,12 +765,36 @@ Page({
               destination = tripInfo.destination;
             }
             
-            const result = await saveTripAsTemplate({
-              tripId: tripId,
+            // 获取物品列表
+            const items = [];
+            this.data.listCategories.forEach(category => {
+              category.items.forEach(item => {
+                items.push({
+                  name: item.name,
+                  category: item.originalCategory || category.originalCategory,
+                  quantity: item.quantity || 1,
+                  notes: item.notes || ''
+                });
+              });
+            });
+            
+            const templateData = {
               templateName: tripInfo.tripName || `${destination}模板`,
               description: tripInfo.activities || tripInfo.description || '',
-              tags: [tripInfo.type || tripInfo.tripType].filter(Boolean)
-            });
+              items: items,
+              tags: [tripInfo.type || tripInfo.tripType].filter(Boolean),
+              tripSummary: {
+                place: destination,
+                days: tripInfo.days || '',
+                type: tripInfo.type || tripInfo.tripType || '',
+                weather: tripInfo.weather || '',
+                activities: tripInfo.activities || '',
+                physique: tripInfo.physique || '',
+                tripId: tripId
+              }
+            };
+            
+            const result = await createTemplate(templateData);
             
             wx.hideLoading();
             
@@ -704,9 +802,6 @@ Page({
               title: '保存成功',
               icon: 'success'
             });
-            
-            // 更新本地模板列表
-            this.refreshLocalTemplates();
             
           } catch (error) {
             wx.hideLoading();
@@ -719,18 +814,6 @@ Page({
         }
       }
     });
-  },
-
-  /**
-   * 刷新本地模板列表
-   */
-  refreshLocalTemplates() {
-    try {
-      // 可以从服务器重新获取模板列表
-      console.log('模板已保存');
-    } catch (error) {
-      console.error('刷新模板失败：', error);
-    }
   },
 
   /**

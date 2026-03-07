@@ -128,7 +128,7 @@ Page({
           hasMore = newTrips.length >= this.data.pageSize;
         }
 
-        // 格式化行程数据
+        // 格式化行程数据 - 关键修改：从 destinations[0].poiName 获取 typeIndex
         newTrips = newTrips.map((item) => {
           console.log(`行程 ${item.id} 的原始数据:`, JSON.stringify(item, null, 2));
           
@@ -184,6 +184,54 @@ Page({
             cityName = '未指定目的地';
           }
 
+          // ===== 关键修改：从 destinations[0].poiName 获取 typeIndex =====
+          let typeIndex = 0; // 默认值：休闲旅行
+          let tripType = '休闲旅行'; // 默认值
+          
+          // 检查是否有 destinations 数组且第一个元素有 poiName
+          if (rawDestinations.length > 0 && rawDestinations[0].poiName !== undefined) {
+            // poiName 中存储的就是 typeIndex
+            const poiNameValue = rawDestinations[0].poiName;
+            console.log('行程的 poiName:', poiNameValue, '类型:', typeof poiNameValue);
+            
+            // 将 poiName 转换为数字索引
+            if (poiNameValue !== null && poiNameValue !== '') {
+              // 如果是字符串数字，转换为数字
+              if (typeof poiNameValue === 'string' && !isNaN(parseInt(poiNameValue))) {
+                typeIndex = parseInt(poiNameValue);
+              } 
+              // 如果已经是数字
+              else if (typeof poiNameValue === 'number') {
+                typeIndex = poiNameValue;
+              }
+              // 如果是其他字符串，尝试匹配类型名称
+              else if (typeof poiNameValue === 'string') {
+                const matchedIndex = this.data.typeList.indexOf(poiNameValue);
+                if (matchedIndex >= 0) {
+                  typeIndex = matchedIndex;
+                }
+              }
+              
+              // 确保 typeIndex 在有效范围内
+              if (typeIndex < 0 || typeIndex >= this.data.typeList.length) {
+                typeIndex = 0;
+              }
+            }
+            
+            // 根据 typeIndex 获取对应的类型名称
+            tripType = this.data.typeList[typeIndex];
+            console.log(`映射后: poiName=${poiNameValue} -> typeIndex=${typeIndex} -> tripType=${tripType}`);
+          } else {
+            // 如果没有 poiName，尝试从其他字段获取类型
+            if (item.tripType) {
+              const matchedIndex = this.data.typeList.indexOf(item.tripType);
+              if (matchedIndex >= 0) {
+                typeIndex = matchedIndex;
+                tripType = item.tripType;
+              }
+            }
+          }
+
           // 返回完整数据，保留原始的 destinations 数组
           return {
             id: item.id,
@@ -192,7 +240,8 @@ Page({
             startDate: item.startDate || '',
             endDate: item.endDate || '',
             days: days || '?',
-            type: item.tripType || '休闲旅行',
+            type: tripType,  // 使用映射后的类型名称
+            typeIndex: typeIndex, // 存储 typeIndex 供前端使用
             activities: item.activities || '',
             weather: item.weather || '',
             physique: item.physique || '',
@@ -226,6 +275,7 @@ Page({
         }
         
         console.log(`合并后共有 ${trips.length} 个行程（去重后）`);
+        console.log('第一个行程的 typeIndex:', trips[0]?.typeIndex);
         
         this.setData({
           trips: trips,
@@ -316,6 +366,7 @@ Page({
     } else if (currentTab < defaultTabs.length) {
       const tabName = defaultTabs[currentTab];
       console.log('当前默认标签名称:', tabName);
+      // 使用 type 字段进行过滤
       filteredTrips = trips.filter(t => t.type === tabName);
       console.log(`标签"${tabName}"匹配到 ${filteredTrips.length} 个行程`);
     } else {
@@ -487,7 +538,7 @@ Page({
     });
   },
 
-  // 编辑行程 - 修复版本
+  // 编辑行程
   editTrip(e) {
     const tripId = e.currentTarget.dataset.id;
     const trip = this.data.trips.find(t => t.id === tripId);
@@ -495,15 +546,14 @@ Page({
     if (trip) {
       console.log('编辑行程，原始数据:', trip);
       
-      const typeIndex = this.data.typeList.indexOf(trip.type) >= 0 
-        ? this.data.typeList.indexOf(trip.type) 
-        : 0;
+      // 直接使用 trip 中已存储的 typeIndex
+      const typeIndex = trip.typeIndex !== undefined ? trip.typeIndex : 0;
       
       // 处理目的地数据
       let destinations = [];
       
       if (trip.destinations && Array.isArray(trip.destinations) && trip.destinations.length > 0) {
-        // 有原始的 destinations 数组，直接使用（可能已经包含完整字段）
+        // 有原始的 destinations 数组，直接使用
         destinations = trip.destinations;
         console.log('使用原始 destinations:', destinations);
       } else if (trip.cityName && trip.cityName !== '未指定目的地') {
@@ -511,7 +561,8 @@ Page({
         const cityNames = trip.cityName.split(/[、,]/).map(name => name.trim()).filter(name => name);
         destinations = cityNames.map((name, index) => ({
           cityName: name,
-          country: '中国',  // 默认值
+          country: '中国',
+          poiName: typeIndex, // 保存 typeIndex 到 poiName
           arrivalDate: trip.startDate || '',
           departureDate: trip.endDate || '',
           orderIndex: index + 1
@@ -534,7 +585,7 @@ Page({
           startDate: trip.startDate || '',
           endDate: trip.endDate || '',
           days: trip.days || '',
-          typeIndex: typeIndex,
+          typeIndex: typeIndex, // 使用已存储的 typeIndex
           activities: trip.activities || '',
           weather: weatherIndex,
           physique: physiqueIndex
@@ -692,6 +743,7 @@ Page({
         return {
           cityName: name,
           country: '中国',
+          poiName: this.data.formData.typeIndex, // 保存当前 typeIndex 到 poiName
           arrivalDate: this.data.formData.startDate || '',
           departureDate: this.data.formData.endDate || '',
           orderIndex: index + 1
@@ -748,7 +800,24 @@ Page({
   },
 
   onTypeChange(e) {
-    this.setData({ 'formData.typeIndex': parseInt(e.detail.value) });
+    const typeIndex = parseInt(e.detail.value);
+    
+    // 更新 formData 中的 typeIndex
+    this.setData({ 
+      'formData.typeIndex': typeIndex
+    });
+    
+    // 同时更新 destinations 中的 poiName
+    if (this.data.formData.destinations && this.data.formData.destinations.length > 0) {
+      const destinations = this.data.formData.destinations.map(dest => ({
+        ...dest,
+        poiName: typeIndex
+      }));
+      
+      this.setData({
+        'formData.destinations': destinations
+      });
+    }
   },
 
   onActivitiesInput(e) {
@@ -808,7 +877,7 @@ Page({
           tripId: null,
           cityName: dest.cityName,
           country: dest.country || '中国',
-          poiName: null,
+          poiName: formData.typeIndex, // 保存 typeIndex 到 poiName
           arrivalDate: dest.arrivalDate || formData.startDate,
           departureDate: dest.departureDate || endDate,
           orderIndex: dest.orderIndex || index + 1
