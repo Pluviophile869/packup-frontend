@@ -101,8 +101,74 @@
     </picker>
   </view>
 
+  <!-- 智能生成选项 -->
+  <view class="generate-options">
+    <view class="options-title">智能生成选项</view>
+    
+    <!-- 天气生成开关 -->
+    <view class="option-item">
+      <view class="option-info">
+        <text class="option-icon">🌤️</text>
+        <view class="option-text">
+          <text class="option-name">根据天气生成物品</text>
+          <text class="option-desc">基于当地天气自动推荐合适物品</text>
+        </view>
+      </view>
+      <switch 
+        checked="{{generateOptions.weather}}" 
+        bindchange="toggleWeatherOption" 
+        color="#0ABAB5"
+      />
+    </view>
+    
+    <!-- AI生成开关 -->
+    <view class="option-item">
+      <view class="option-info">
+        <text class="option-icon">🪄</text>
+        <view class="option-text">
+          <text class="option-name">AI智能生成物品</text>
+          <text class="option-desc">根据行程信息AI推荐个性化物品</text>
+        </view>
+      </view>
+      <switch 
+        checked="{{generateOptions.ai}}" 
+        bindchange="toggleAIOption" 
+        color="#0ABAB5"
+      />
+    </view>
+  </view>
+
+  <!-- 加载状态提示 -->
+  <view class="loading-status" wx:if="{{weatherGenerating || aiGenerating}}">
+    <view class="loading-item" wx:if="{{weatherGenerating}}">
+      <text class="loading-icon">🌤️</text>
+      <text class="loading-text">正在根据天气生成物品...</text>
+    </view>
+    <view class="loading-item" wx:if="{{aiGenerating}}">
+      <text class="loading-icon">🪄</text>
+      <text class="loading-text">正在AI智能生成物品...</text>
+    </view>
+  </view>
+
+  <!-- 测试按钮（开发阶段使用，可以注释掉） -->
+  <view class="test-buttons" wx:if="{{userId && false}}"> <!-- 改为false隐藏测试按钮 -->
+    <button class="test-btn" bindtap="testWeatherGenerate" loading="{{isLoading}}" disabled="{{isLoading}}">
+      测试天气生成
+    </button>
+    <button class="test-btn" bindtap="testAIGenerate" loading="{{isLoading}}" disabled="{{isLoading}}">
+      测试AI生成
+    </button>
+  </view>
+
   <!-- 提交按钮 -->
-  <button class="submit-btn" bindtap="getList">生成行李清单</button>
+  <button 
+    class="submit-btn" 
+    bindtap="getList" 
+    loading="{{isLoading}}"
+    disabled="{{isLoading}}"
+  >
+    {{isLoading ? '生成中...' : '生成行李清单'}}
+  </button>
 </view>
 
 <!-- 侧栏遮罩层 -->
